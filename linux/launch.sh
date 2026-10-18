@@ -42,7 +42,7 @@ say_error() {
             xmessage -center "$1" 2>/dev/null
         fi
     else
-        read -r -p "Нажмите Enter для выхода..." _ || true
+        read -r -p "Press Enter to exit..." _ || true
     fi
 }
 
@@ -53,15 +53,15 @@ say_error() {
 # look for Antigravity in root's home and set the proxy up for root. A server
 # where root *is* the user (no SUDO_USER) is fine.
 if [ "$(id -u)" -eq 0 ] && [ -n "${SUDO_USER:-}" ]; then
-    say_error "Запускайте без sudo: bash launch.sh
-Под root программа не видит ваш рабочий стол и искала бы Antigravity
-в домашней папке root, а не $SUDO_USER. Права root ей не нужны."
+    say_error "Run without sudo: bash launch.sh
+As root, the program cannot access your desktop and would search for Antigravity
+in root's home directory instead of $SUDO_USER's. Root privileges are not needed."
     exit 1
 fi
 
 if [ ! -f "$BIN" ]; then
-    say_error "Не найден файл программы: $BIN
-Распакуйте архив целиком и запустите launch.sh из распакованной папки."
+    say_error "Program file not found: $BIN
+Extract the entire archive and run launch.sh from the extracted folder."
     exit 1
 fi
 
@@ -79,8 +79,8 @@ if ! "$BIN" --version >/dev/null 2>&1; then
         && "$HOME_BIN" --version >/dev/null 2>&1; then
         BIN="$HOME_BIN"
     else
-        say_error "Программа не запускается ни отсюда, ни из домашней папки: $BIN
-Нужен 64-битный Linux (x86-64)."
+        say_error "The program cannot run from this location or from your home folder: $BIN
+64-bit Linux (x86-64) is required."
         exit 1
     fi
 fi
@@ -92,8 +92,8 @@ if [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ]; then
     if [ -t 0 ] && [ -t 1 ]; then
         exec "$BIN" --tui "$@"
     fi
-    say_error "Нет графической сессии (не заданы DISPLAY и WAYLAND_DISPLAY).
-Запустите из терминала: $BIN --tui"
+    say_error "No graphical session detected (DISPLAY and WAYLAND_DISPLAY are not set).
+Run from a terminal: $BIN --tui"
     exit 1
 fi
 
