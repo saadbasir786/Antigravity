@@ -1174,7 +1174,7 @@ impl App {
     }
 }
 
-/// One switch as a line: `[вкл ] Title — note`.
+/// One switch as a line: `[ ON ] Title — note`.
 fn switch_line(
     indent: &str,
     title: &str,
@@ -1183,9 +1183,9 @@ fn switch_line(
     width: u16,
 ) -> ListItem<'static> {
     let (badge, color) = match state {
-        State::On => ("[вкл ]", Color::Green),
-        State::Partial(_) => ("[вкл~]", Color::Yellow),
-        State::Off | State::OffNote(_) => ("[выкл]", Color::DarkGray),
+        State::On => ("[ ON ]", Color::Green),
+        State::Partial(_) => ("[ON~]", Color::Yellow),
+        State::Off | State::OffNote(_) => ("[OFF]", Color::DarkGray),
         State::Blocked(_) => ("[ -- ]", Color::Yellow),
     };
     let color = if busy { Color::DarkGray } else { color };
@@ -1393,7 +1393,7 @@ mod tests {
         assert_eq!(base64(b"fo"), "Zm8=");
         assert_eq!(base64(b"foo"), "Zm9v");
         assert_eq!(base64(b"foobar"), "Zm9vYmFy");
-        assert_eq!(base64("ключ".as_bytes()), "0LrQu9GO0Yc=");
+        assert_eq!(base64("key".as_bytes()), "0LrQu9GO0Yc=");
     }
 
     #[test]
@@ -1403,6 +1403,6 @@ mod tests {
         assert_eq!(wrapped_height("abcdefghijk", 10), 2);
         assert_eq!(wrapped_height("ab\ncd", 10), 2);
         // Cyrillic is one column per letter, not one per byte.
-        assert_eq!(wrapped_height("ключключкл", 10), 1);
+        assert_eq!(wrapped_height("keykeykey", 10), 1);
     }
 }
