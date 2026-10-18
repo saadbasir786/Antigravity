@@ -176,11 +176,11 @@ impl App {
         self.busy.is_some()
     }
 
-    /// The "новая версия" button, drawn on both screens (spec item 10: it must
+    /// The "new version" button, drawn on both screens (spec item 10: it must
     /// not disappear after the key is accepted).
     fn update_banner(&self, ui: &mut egui::Ui) {
         let Some(rel) = &self.update else { return };
-        let label = format!("⬆  Доступна новая версия — {}", rel.display_version());
+        let label = format!("⬆  Доступна new version — {}", rel.display_version());
         let btn = egui::Button::new(egui::RichText::new(label).color(egui::Color32::BLACK))
             .fill(theme::WARN)
             .corner_radius(egui::CornerRadius::same(theme::RADIUS_SMALL))
@@ -363,7 +363,7 @@ pub fn run() -> Result<(), String> {
             Err(e @ eframe::Error::WinitEventLoop(_)) => {
                 renderer::forget();
                 return Err(format!(
-                    "нет доступа к графическому дисплею: {}",
+                    "no access to graphical display: {}",
                     without_source_location(&e.to_string())
                 ));
             }
@@ -375,7 +375,7 @@ pub fn run() -> Result<(), String> {
     // says more about this start (a session with no desktop) than about the
     // machine, so the next start gets the whole chain again.
     renderer::forget();
-    Err(format!("не удалось открыть окно ({})", failures.join("; ")))
+    Err(format!("could not open window ({})", failures.join("; ")))
 }
 
 /// winit's `os error at <file>.rs:<line>: <what>` is for its own developers;
