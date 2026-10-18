@@ -435,21 +435,21 @@ fn network_facts(app: &App, ui: &mut egui::Ui) {
     let vpn = if !r.tunnel {
         "No VPN detected.".to_string()
     } else if r.vpn_exit.is_empty() {
-        "VPN включён — соединения службы с сервисами разблокировки идут мимо него.".to_string()
+        "VPN is enabled — connections to the unlock service bypass it.".to_string()
     } else if crate::upstream::region_is_blocked(&r.vpn_exit) {
         format!(
-            "VPN включён, выход: {} — там ошибка 400, поэтому соединения идут мимо него.",
+            "VPN is enabled, exit route: {} — it returns error 400, so connections bypass it.",
             r.vpn_exit
         )
     } else {
         format!(
-            "VPN включён, выход: {} — используется как один из путей.",
+            "VPN is enabled, exit route: {} — it is being used as one of the routes.",
             r.vpn_exit
         )
     };
     widgets::hint(ui, &vpn);
     if !r.route.is_empty() {
-        widgets::hint(ui, &format!("Первый путь сейчас: {}.", r.route));
+        widgets::hint(ui, &format!("Current primary route: {}.", r.route));
     }
     if !r.loopback {
         widgets::hint(
