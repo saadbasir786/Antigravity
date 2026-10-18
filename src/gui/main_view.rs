@@ -8,7 +8,7 @@
 //!    past the 400, keep the patch after updates) and the installs found.
 //! 3. **Для опытных**, folded — the parts of the bypass one by one, the DNS
 //!    pool, the user's own proxy, what the network looks like right now.
-//! 4. **Журнал**, folded.
+//! 4. **Log**, folded.
 //!
 //! Everything is still a switch that undoes itself - the rule the window was
 //! built on - but the switches are no longer the first thing a user has to
@@ -98,7 +98,7 @@ fn status_card(app: &mut App, ui: &mut egui::Ui) {
         widgets::card(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.add(egui::Spinner::new().size(16.0));
-                ui.label(egui::RichText::new("Проверяю систему…").size(15.0));
+                ui.label(egui::RichText::new("Checking system…").size(15.0));
             });
         });
         return;
@@ -159,16 +159,16 @@ fn status_card(app: &mut App, ui: &mut egui::Ui) {
                 .filter(|(at, _)| at.elapsed() < REPORT_SHOWN_FOR);
             ui.horizontal(|ui| {
                 if ui
-                    .add_enabled(!busy, egui::Button::new(egui::RichText::new("Сохранить отчёт").size(12.5)))
-                    .on_hover_text("Всё, что нужно, чтобы понять, почему Antigravity отвечает или нет — одним файлом на рабочем столе: приложите его к сообщению")
+                    .add_enabled(!busy, egui::Button::new(egui::RichText::new("Save Report").size(12.5)))
+                    .on_hover_text("Everything needed to diagnose Antigravity in one file on your desktop. Attach it to your message.")
                     .clicked()
                 {
                     copy = true;
                 }
                 if let Some((_, path)) = &saved {
                     if ui
-                        .add(egui::Button::new(egui::RichText::new("Показать файл").size(12.5)))
-                        .on_hover_text("Открыть папку с отчётом")
+                        .add(egui::Button::new(egui::RichText::new("Show File").size(12.5)))
+                        .on_hover_text("Open the report folder")
                         .clicked()
                     {
                         reveal = Some(path.clone());
@@ -179,7 +179,7 @@ fn status_card(app: &mut App, ui: &mut egui::Ui) {
                 ui.add_space(4.0);
                 ui.label(
                     egui::RichText::new(format!(
-                        "Отчёт сохранён на рабочий стол: «{}». Приложите этот файл к сообщению.",
+                        "Report saved to your desktop: “{}”. Attach this file to your message.",
                         path.file_name()
                             .map(|f| f.to_string_lossy().into_owned())
                             .unwrap_or_default()
@@ -196,7 +196,7 @@ fn status_card(app: &mut App, ui: &mut egui::Ui) {
                 ui.add_space(4.0);
                 ui.label(
                     egui::RichText::new(
-                        "Файл сохранить не удалось — отчёт скопирован, вставьте его в сообщение.",
+                        "Could not save the file. The report was copied; paste it into your message.",
                     )
                     .size(12.5)
                     .color(theme::WARN),
@@ -275,7 +275,7 @@ fn antigravity_card(app: &mut App, ui: &mut egui::Ui) {
         ui.separator();
         ui.add_space(8.0);
         ui.label(
-            egui::RichText::new("Найденные установки Antigravity")
+            egui::RichText::new("Detected Antigravity installations")
                 .size(12.5)
                 .color(theme::MUTED),
         );
@@ -304,7 +304,7 @@ fn bypass_master(app: &mut App, ui: &mut egui::Ui) {
 
 fn install_rows(app: &mut App, ui: &mut egui::Ui) {
     let Some(rows) = app.status.as_ref().map(|s| s.installs.clone()) else {
-        widgets::hint(ui, "Идёт поиск…");
+        widgets::hint(ui, "Searching…");
         return;
     };
 
@@ -340,7 +340,7 @@ fn install_rows(app: &mut App, ui: &mut egui::Ui) {
                 }
                 None => {
                     ui.label(
-                        egui::RichText::new("не найдено — укажите путь")
+                        egui::RichText::new("Not found — specify a path")
                             .size(12.0)
                             .color(theme::MUTED),
                     );
@@ -352,7 +352,7 @@ fn install_rows(app: &mut App, ui: &mut egui::Ui) {
                     if let Some(p) = &row.path {
                         if ui
                             .small_button("✖")
-                            .on_hover_text("Убрать указанный путь")
+                            .on_hover_text("Remove the specified path")
                             .clicked()
                         {
                             forget = Some(p.clone());
@@ -361,7 +361,7 @@ fn install_rows(app: &mut App, ui: &mut egui::Ui) {
                 }
                 if ui
                     .small_button("✏")
-                    .on_hover_text("Указать путь вручную")
+                    .on_hover_text("Specify path manually")
                     .clicked()
                 {
                     edit = Some(
@@ -396,7 +396,7 @@ fn dev_open() -> bool {
 
 fn advanced_card(app: &mut App, ui: &mut egui::Ui) {
     egui::CollapsingHeader::new(
-        egui::RichText::new("Настройки для опытных")
+        egui::RichText::new("Advanced Settings")
             .size(13.0)
             .color(theme::MUTED),
     )
@@ -433,7 +433,7 @@ fn network_facts(app: &App, ui: &mut egui::Ui) {
         return;
     };
     let vpn = if !r.tunnel {
-        "VPN не обнаружен.".to_string()
+        "No VPN detected.".to_string()
     } else if r.vpn_exit.is_empty() {
         "VPN включён — соединения службы с сервисами разблокировки идут мимо него.".to_string()
     } else if crate::upstream::region_is_blocked(&r.vpn_exit) {
@@ -496,7 +496,7 @@ fn providers_list(app: &mut App, ui: &mut egui::Ui) {
     let mut dropped = false;
 
     egui::CollapsingHeader::new(
-        egui::RichText::new("Какие DNS использовать")
+        egui::RichText::new("DNS servers to use")
             .size(12.5)
             .color(theme::MUTED),
     )
@@ -539,7 +539,7 @@ fn providers_list(app: &mut App, ui: &mut egui::Ui) {
                     let text = egui::RichText::new(status::provider_name(&p.name)).size(13.0);
                     ui.label(if idle { text.color(theme::MUTED) } else { text });
                     if idle {
-                        widgets::hint(ui, "— не используется");
+                        widgets::hint(ui, "— not in use");
                     }
                 })
                 .response;
@@ -607,25 +607,25 @@ fn group_proxy_field(app: &mut App, ui: &mut egui::Ui) {
     );
     ui.add_space(4.0);
     ui.horizontal(|ui| {
-        if ui.button("Скопировать команду").clicked() {
+        if ui.button("Copy command").clicked() {
             let cmd = format!("/ag+{}", crate::hwid::pc_code());
             crate::utils::set_clipboard_text(&cmd);
             app.log.push((
                 Level::Info,
-                "Команда скопирована — отправьте её в группе.".to_string(),
+                "Command copied — share it in the group.".to_string(),
             ));
         }
-        if ui.button("Открыть группу").clicked() {
+        if ui.button("Open group").clicked() {
             crate::utils::open_url(GROUP_ROOM_URL);
         }
     });
     ui.add_space(4.0);
     let field = egui::TextEdit::singleline(&mut app.group_key_input)
-        .hint_text("код из группы")
+        .hint_text("code from the group")
         .desired_width(ui.available_width());
     let resp = ui
         .add_enabled(!busy, field)
-        .on_hover_text("Правая кнопка мыши — вставить код из буфера");
+        .on_hover_text("Right-click to paste the code from the clipboard");
     // Right click pastes: egui's field has no context menu, and the code
     // arrives on the clipboard from Telegram.
     let mut right_pasted = false;
@@ -656,12 +656,12 @@ fn own_proxy_field(app: &mut App, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
         ui.add_space(10.0);
         let field = egui::TextEdit::singleline(&mut app.own_proxy_input)
-            .hint_text("логин:пароль@адрес:порт или адрес:порт")
+            .hint_text("username:password@host:port or host:port")
             .desired_width(ui.available_width() - 110.0);
         let resp = ui.add_enabled(!busy, field);
         let entered = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if ui
-            .add_enabled(!busy, egui::Button::new("Применить"))
+            .add_enabled(!busy, egui::Button::new("Apply"))
             .clicked()
             || entered
         {
@@ -716,7 +716,7 @@ fn log_line(level: Level, line: &str) -> String {
 }
 
 fn log_card(app: &mut App, ui: &mut egui::Ui) {
-    egui::CollapsingHeader::new(egui::RichText::new("Журнал").size(13.0).color(theme::MUTED))
+    egui::CollapsingHeader::new(egui::RichText::new("Log").size(13.0).color(theme::MUTED))
         .id_salt("log")
         .default_open(dev_open())
         .show(ui, |ui| {
@@ -742,7 +742,7 @@ fn log_card(app: &mut App, ui: &mut egui::Ui) {
                 .auto_shrink([false, false])
                 .show(ui, |ui| {
                     if app.log.is_empty() {
-                        widgets::hint(ui, "Пока ничего не делалось.");
+                        widgets::hint(ui, "Nothing has happened yet.");
                     }
                     for (level, line) in &app.log {
                         let color = match level {
@@ -842,7 +842,7 @@ fn footer(ui: &mut egui::Ui) {
             crate::utils::open_url(TELEGRAM_GROUP_URL);
         }
         ui.label(
-            egui::RichText::new("Группа в Telegram:")
+            egui::RichText::new("Telegram group:")
                 .size(FOOTER_TEXT)
                 .color(theme::MUTED),
         );
@@ -858,7 +858,7 @@ fn footer(ui: &mut egui::Ui) {
             crate::utils::open_url(DONATE_URL);
         }
         ui.label(
-            egui::RichText::new("Отблагодарить копеечкой:")
+            egui::RichText::new("Support the project:")
                 .size(FOOTER_TEXT)
                 .color(theme::MUTED),
         );
@@ -873,7 +873,7 @@ pub fn path_dialog(app: &mut App, ctx: &egui::Context) {
     let mut keep_open = true;
     let mut submit = false;
 
-    egui::Window::new("Путь к Antigravity")
+    egui::Window::new("Antigravity Path")
         .collapsible(false)
         .resizable(false)
         .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
@@ -896,10 +896,10 @@ pub fn path_dialog(app: &mut App, ctx: &egui::Context) {
             }
             ui.add_space(10.0);
             ui.horizontal(|ui| {
-                if widgets::primary(ui, "Добавить", !text.trim().is_empty()).clicked() {
+                if widgets::primary(ui, "Add", !text.trim().is_empty()).clicked() {
                     submit = true;
                 }
-                if widgets::ghost(ui, "Отмена").clicked() {
+                if widgets::ghost(ui, "Cancel").clicked() {
                     keep_open = false;
                 }
             });
@@ -915,7 +915,7 @@ pub fn path_dialog(app: &mut App, ctx: &egui::Context) {
             }
             None => {
                 app.path_dialog_error =
-                    Some("По этому пути установка Antigravity не найдена.".into());
+                    Some("No Antigravity installation was found at this path.".into());
             }
         }
     }
