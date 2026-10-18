@@ -24,7 +24,7 @@ cat >"$DESKTOP_FILE" <<EOF
 Type=Application
 Version=1.0
 Name=Antigravity Unlocker
-Comment=Разблокировать Antigravity 2.0 / IDE / CLI
+Comment=Unlock Antigravity 2.0 / IDE / CLI
 Exec=bash "$APP_DIR/launch.sh"
 $ICON_LINE
 Terminal=false
@@ -38,7 +38,7 @@ gio set "$DESKTOP_FILE" metadata::trusted true 2>/dev/null || true
 update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
 
 echo
-echo "Готово. «Antigravity Unlocker» добавлен в меню приложений."
-echo "Запускайте его двойным кликом из списка программ (Activities / app grid)."
+echo "Done. Antigravity Unlocker has been added to the applications menu."
+echo "Launch it by double-clicking it in the applications menu (Activities / app grid)."
 echo
-read -r -p "Нажмите Enter для выхода..." _ || true
+read -r -p "Press Enter to exit..." _ || true
