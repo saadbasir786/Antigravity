@@ -72,12 +72,12 @@ pub fn run(note: Option<String>) -> Result<(), String> {
         std::panic::set_hook(Box::new(|info| {
             crate::utils::message_box(
                 "Antigravity Unlocker",
-                &format!("Программа аварийно завершилась.\n\n{info}"),
+                &format!("The application crashed.\n\n{info}"),
             );
         }));
     }
 
-    let mut terminal = ratatui::try_init().map_err(|e| format!("терминал недоступен: {e}"))?;
+    let mut terminal = ratatui::try_init().map_err(|e| format!("terminal unavailable: {e}"))?;
     // Bracketed paste makes a pasted key one event instead of 25 keystrokes.
     // Windows' console has no such mode; there a paste arrives as keys, which
     // the key field takes just as well.
@@ -234,13 +234,13 @@ impl App {
             if dirty || drawn_at.is_none_or(|t| t.elapsed() >= Duration::from_secs(1)) {
                 terminal
                     .draw(|f| self.draw(f))
-                    .map_err(|e| format!("терминал: {e}"))?;
+                    .map_err(|e| format!("terminal: {e}"))?;
                 drawn_at = Some(Instant::now());
                 dirty = false;
             }
-            if event::poll(Duration::from_millis(200)).map_err(|e| format!("терминал: {e}"))?
+            if event::poll(Duration::from_millis(200)).map_err(|e| format!("terminal: {e}"))?
             {
-                match event::read().map_err(|e| format!("терминал: {e}"))? {
+                match event::read().map_err(|e| format!("terminal: {e}"))? {
                     // Windows reports releases too; only a press is a keystroke.
                     TermEvent::Key(k) if k.kind != KeyEventKind::Release => self.on_key(k),
                     TermEvent::Paste(text) => self.on_paste(&text),
@@ -399,7 +399,7 @@ impl App {
                     None => {
                         self.input = Some(Input::Path {
                             text,
-                            error: Some("По этому пути установка Antigravity не найдена.".into()),
+                            error: Some("No Antigravity installation was found at this path.".into()),
                         })
                     }
                 }
@@ -490,7 +490,7 @@ impl App {
 
     fn busy_refusal(&mut self) -> bool {
         if let Some(what) = self.busy.clone() {
-            self.toast(format!("Подождите — идёт: {what}"));
+            self.toast(format!("Please wait — {what} in progress"));
             return true;
         }
         false
@@ -509,7 +509,7 @@ impl App {
                     .map(|s| s.get(cap).clone())
                     .unwrap_or(State::Off);
                 if let State::Blocked(why) = &state {
-                    self.toast(format!("Не включается: {why}"));
+                    self.toast(format!("Could not enable: {why}"));
                     return;
                 }
                 if cap == Cap::OwnProxy && !state.is_on() && self.own_proxy_text().is_empty() {
@@ -545,18 +545,18 @@ impl App {
             }
             Row::GroupProxyOpenRoom => {
                 crate::utils::open_url("https://t.me/nova_txt/69864");
-                self.toast("Открыто в браузере: https://t.me/nova_txt/69864");
+                self.toast("Opened in browser: https://t.me/nova_txt/69864");
             }
             Row::GroupProxyCopy => {
                 let cmd = format!("/ag+{}", crate::hwid::pc_code());
                 crate::utils::set_clipboard_text(&cmd);
-                self.toast(format!("Скопировано: {} — отправьте это сообщение в комнате", cmd));
+                self.toast(format!("Copied: {} — share this message in the group", cmd));
             }
             Row::GroupProxyPaste => {
                 if let Some(text) = crate::utils::clipboard_text() {
                     self.worker.send(Cmd::SetGroupKey(text));
                 } else {
-                    self.toast("Буфер обмена пуст");
+                    self.toast("Clipboard is empty");
                 }
             }
             Row::GroupProxyText => {}
@@ -573,8 +573,8 @@ impl App {
         let offered = self.facts().and_then(|f| status::headline(&f).action);
         match offered {
             Some(a) if a == action => self.act(action),
-            Some(a) => self.toast(format!("Сейчас нужно другое: {}.", a.label())),
-            None => self.toast(format!("«{}» сейчас не нужно.", action.label())),
+            Some(a) => self.toast(format!("Another action is needed now: {}.", a.label())),
+            None => self.toast(format!("“{}” is not needed right now.", action.label())),
         }
     }
 
@@ -591,14 +591,14 @@ impl App {
                     self.quit = true;
                     return;
                 }
-                self.toast("Права администратора не получены.");
+                self.toast("Administrator privileges were not granted.");
             }
             // Opened, and also shown: a terminal with no desktop behind it has
             // no browser to open, and the link is then copied from here.
             Action::Verify => {
                 if let Some((_, url)) = self.facts().and_then(|f| f.verify) {
                     crate::utils::open_url_as_user(&url);
-                    self.toast(format!("Если браузер не открылся, откройте ссылку вручную: {url}"));
+                    self.toast(format!("If the browser did not open, open this link manually: {url}"));
                 }
             }
         }
@@ -618,7 +618,7 @@ impl App {
                 let p = p.clone();
                 self.worker.send(Cmd::ForgetPath(p));
             }
-            _ => self.toast("Убрать можно только путь, указанный вручную."),
+            _ => self.toast("Only manually added paths can be removed."),
         }
     }
 
@@ -650,7 +650,7 @@ impl App {
             .unwrap_or_default()
     }
 
-    /// The window's «Сохранить отчёт». The file is the deliverable - a report
+    /// The window's «Save Report». The file is the deliverable - a report
     /// pasted into a chat is a wall of text that arrives truncated - so it goes
     /// to the Desktop, and to the state directory when there is no Desktop to
     /// write to (a server). It is also offered to the terminal (OSC 52: Windows
@@ -668,17 +668,17 @@ impl App {
         let copied = copy_out(&text);
         let msg = match (saved, copied) {
             (Some(path), Copied::Clipboard) => {
-                format!("Отчёт сохранён: {} (и скопирован)", path.display())
+                format!("Report saved: {} (and copied)", path.display())
             }
             (Some(path), Copied::Terminal) => format!(
-                "Отчёт сохранён: {} (и передан терминалу для буфера обмена)",
+                "Report saved: {} (and sent to the terminal clipboard)",
                 path.display()
             ),
             (None, Copied::Clipboard) => {
-                "Файл сохранить не удалось — отчёт скопирован в буфер обмена.".to_string()
+                "Could not save the file — report copied to clipboard.".to_string()
             }
             (None, Copied::Terminal) => {
-                "Файл сохранить не удалось — отчёт передан терминалу для буфера обмена.".to_string()
+                "Could not save the file — report sent to the terminal clipboard.".to_string()
             }
         };
         self.toast(msg);
@@ -734,26 +734,26 @@ impl App {
                     .and_then(|s| s.installs.get(i))
                     .is_some_and(|r| r.manual);
                 let full = self.install_path(i).unwrap_or_default();
-                let mut s = "Enter — указать путь вручную".to_string();
+                let mut s = "Enter — specify path manually".to_string();
                 if manual {
-                    s.push_str(", x — убрать указанный путь");
+                    s.push_str(", x — remove specified path");
                 }
                 if !full.is_empty() {
                     s.push_str(&format!(". {full}"));
                 }
                 s
             }
-            Row::Advanced => "Детали обхода: DNS-серверы, прокси, выходы.".into(),
-            Row::Provider(_) => "Пробел — включить или выключить сервер, +/- — выше или ниже в списке.".into(),
-            Row::GroupProxyText => "Код этого ПК и состояние ключа.".into(),
-            Row::GroupProxyOpenRoom => "Открыть Telegram-комнату для получения ключа.".into(),
-            Row::GroupProxyCopy => "Скопировать команду для получения ключа.".into(),
-            Row::GroupProxyPaste => "Вставить полученный ключ из буфера обмена.".into(),
+            Row::Advanced => "Bypass details: DNS servers, proxies, and exit routes.".into(),
+            Row::Provider(_) => "Space — enable/disable server; +/- — move it up or down the list.".into(),
+            Row::GroupProxyText => "This PC's code and key status.".into(),
+            Row::GroupProxyOpenRoom => "Open the Telegram group to get a key.".into(),
+            Row::GroupProxyCopy => "Copy the command for getting a key.".into(),
+            Row::GroupProxyPaste => "Paste the key from the clipboard.".into(),
             Row::OwnProxyText => {
-                "Enter — изменить адрес: логин:пароль@адрес:порт (или адрес:порт без пароля).".into()
+                "Enter — edit address: username:password@host:port (or host:port without a password).".into()
             }
             Row::Report => {
-                "Всё, что нужно, чтобы понять, почему Antigravity отвечает или нет — одним текстом для группы.".into()
+                "Everything needed to diagnose Antigravity, as text you can share in the group.".into()
             }
         }
     }
@@ -794,7 +794,7 @@ impl App {
                     (None, _) => (
                         "○",
                         Color::DarkGray,
-                        "не найдено — Enter: указать путь".to_string(),
+                        "Not found — press Enter to specify path".to_string(),
                     ),
                     (Some(p), patched) => (
                         "●",
@@ -807,9 +807,9 @@ impl App {
                     ),
                 };
                 let tail = match (&r.path, r.patched) {
-                    (Some(_), Some(true)) => " · пропатчен",
-                    (Some(_), Some(false)) => " · не пропатчен",
-                    (Some(_), None) => " · проверяю…",
+                    (Some(_), Some(true)) => " · patched",
+                    (Some(_), Some(false)) => " · not patched",
+                    (Some(_), None) => " · checking…",
                     (None, _) => "",
                 };
                 ListItem::new(Line::from(vec![
@@ -822,7 +822,7 @@ impl App {
             }
             Row::Advanced => ListItem::new(Line::styled(
                 format!(
-                    "{} Настройки для опытных",
+                    "{} Advanced Settings",
                     if self.advanced { "▾" } else { "▸" }
                 ),
                 Style::new().fg(Color::Gray),
@@ -838,33 +838,33 @@ impl App {
             Row::GroupProxyText => {
                 let pc = crate::hwid::pc_code();
                 let key_text = if crate::settings::group_key().is_empty() {
-                    "ключа нет"
+                    "no key"
                 } else {
-                    "ключ принят"
+                    "key accepted"
                 };
                 ListItem::new(Line::from(vec![
-                    Span::raw("      Код ПК: "),
+                    Span::raw("      PC code: "),
                     Span::styled(format!("{} - {}", pc, key_text), Style::new().fg(Color::Gray)),
                 ]))
             }
-            Row::GroupProxyOpenRoom => ListItem::new(Line::from(vec![Span::styled("      > Открыть комнату группы", Style::new().fg(Color::Cyan))])),
-            Row::GroupProxyCopy => ListItem::new(Line::from(vec![Span::styled("      > Скопировать команду", Style::new().fg(Color::Cyan))])),
-            Row::GroupProxyPaste => ListItem::new(Line::from(vec![Span::styled("      > Вставить ключ из буфера", Style::new().fg(Color::Cyan))])),
+            Row::GroupProxyOpenRoom => ListItem::new(Line::from(vec![Span::styled("      > Open group", Style::new().fg(Color::Cyan))])),
+            Row::GroupProxyCopy => ListItem::new(Line::from(vec![Span::styled("      > Copy command", Style::new().fg(Color::Cyan))])),
+            Row::GroupProxyPaste => ListItem::new(Line::from(vec![Span::styled("      > Paste key from clipboard", Style::new().fg(Color::Cyan))])),
             Row::OwnProxyText => {
                 let text = self.own_proxy_text();
                 let shown = if text.is_empty() {
-                    "не задан".to_string()
+                    "not set".to_string()
                 } else {
                     text
                 };
                 ListItem::new(Line::from(vec![
-                    Span::raw("      Адрес прокси: "),
+                    Span::raw("      Proxy address: "),
                     Span::styled(shown, Style::new().fg(Color::Gray)),
                 ]))
             }
             Row::Report => ListItem::new(Line::from(vec![
                 Span::styled("⎘ ", Style::new().fg(Color::Cyan)),
-                Span::raw("Сохранить отчёт"),
+                Span::raw("Save Report"),
             ])),
         }
     }
@@ -878,7 +878,7 @@ impl App {
         if area.width < MIN_W || area.height < MIN_H {
             f.render_widget(
                 Paragraph::new(format!(
-                    "Окно терминала слишком маленькое: нужно хотя бы {MIN_W}×{MIN_H} (сейчас {}×{}).",
+                    "Terminal window is too small. Minimum: {MIN_W}×{MIN_H} (current: {}×{}).",
                     area.width, area.height
                 ))
                 .wrap(Wrap { trim: true }),
@@ -900,7 +900,7 @@ impl App {
         if let Some(rel) = &self.update {
             spans.push(Span::styled(
                 format!(
-                    " ⬆ новая версия {}: {} ",
+                    " ⬆ New version {}: {} ",
                     rel.display_version(),
                     update::RELEASES_LATEST_URL
                 ),
@@ -929,7 +929,7 @@ impl App {
         let mut lines = vec![
             Line::raw(""),
             Line::styled(
-                "Лицензионный ключ",
+                "License Key",
                 Style::new().add_modifier(Modifier::BOLD),
             ),
             Line::raw(""),
@@ -947,23 +947,23 @@ impl App {
                 .filter(|c| c.is_ascii_alphanumeric())
                 .count();
             let why = if normalized != 24 {
-                "В ключе 24 буквы и цифры (дефис не считается)."
+                "The key must contain 24 letters and digits (hyphens do not count)."
             } else {
-                "Ключ не подходит к этой версии анлокера."
+                "This key is not valid for this unlocker version."
             };
             lines.push(Line::styled(why, Style::new().fg(Color::Red)));
             lines.push(Line::raw(""));
         }
         lines.push(Line::styled(
             format!(
-                "Ключ можно взять в группе: {}",
+                "Get a key from the group: {}",
                 crate::gui::TELEGRAM_KEYS_URL
             ),
             Style::new().fg(Color::Gray),
         ));
         lines.push(Line::raw(""));
         lines.push(Line::styled(
-            "Enter — продолжить · Ctrl+U — стереть · Esc — выход",
+            "Enter — continue · Ctrl+U — clear · Esc — quit",
             Style::new().fg(Color::DarkGray),
         ));
         f.render_widget(
@@ -1026,7 +1026,7 @@ impl App {
     fn draw_card(&self, f: &mut Frame, area: Rect, headline: Option<&status::Headline>) {
         let Some(h) = headline else {
             f.render_widget(
-                Paragraph::new("Проверяю систему…").block(Block::new().borders(Borders::ALL)),
+                Paragraph::new("Checking system…").block(Block::new().borders(Borders::ALL)),
                 area,
             );
             return;
@@ -1063,7 +1063,7 @@ impl App {
     fn draw_journal(&self, f: &mut Frame, area: Rect) {
         let block = Block::new()
             .borders(Borders::TOP)
-            .title(Span::styled(" Журнал ", Style::new().fg(Color::Gray)))
+            .title(Span::styled(" Log ", Style::new().fg(Color::Gray)))
             .border_style(Style::new().fg(Color::DarkGray));
         let inner = block.inner(area);
         f.render_widget(block, area);
@@ -1106,12 +1106,12 @@ impl App {
             self.toast = None;
         }
         let offered = match self.facts().and_then(|f| status::headline(&f).action) {
-            Some(Action::EnableAll) => " · a — включить всё",
-            Some(Action::Repair) => " · r — починить",
-            Some(Action::Verify) => " · v — пройти верификацию",
+            Some(Action::EnableAll) => " · a — enable all",
+            Some(Action::Repair) => " · r — repair",
+            Some(Action::Verify) => " · v — verify",
             _ => "",
         };
-        let keys = format!("↑↓ выбор · Пробел/Enter — вкл/выкл{offered} · o — отчёт · q — выход");
+        let keys = format!("↑↓ select · Space/Enter — toggle{offered} · o — report · q — quit");
         f.render_widget(
             Paragraph::new(keys).style(Style::new().fg(Color::DarkGray)),
             area,
@@ -1121,13 +1121,13 @@ impl App {
     fn draw_input(&self, f: &mut Frame, area: Rect) {
         let (title, hint, text, error) = match &self.input {
             Some(Input::Path { text, error }) => (
-                " Путь к Antigravity ",
-                "Папка установки Antigravity, IDE или CLI. Можно указать вложенную — корень будет найден сам.",
+                " Antigravity Path ",
+                "Antigravity, IDE, or CLI installation folder. You can enter a subfolder; the root will be detected automatically.",
                 text,
                 error.as_deref(),
             ),
             Some(Input::OwnProxy { text }) => (
-                " Свой HTTP-прокси ",
+                " Custom HTTP Proxy ",
                 "Формат: логин:пароль@адрес:порт — или просто адрес:порт, если пароля нет. \
                  Например ivan:secret@203.0.113.9:3128. Только HTTP-прокси. \
                  Пустая строка — убрать прокси.",
@@ -1158,7 +1158,7 @@ impl App {
             lines.push(Line::styled(e.to_string(), Style::new().fg(Color::Red)));
         }
         lines.push(Line::styled(
-            "Enter — применить · Esc — отмена",
+            "Enter — apply · Esc — cancel",
             Style::new().fg(Color::DarkGray),
         ));
         f.render_widget(Clear, popup);
@@ -1349,7 +1349,7 @@ mod console {
             if !attached {
                 FreeConsole();
                 if AllocConsole() == 0 {
-                    return Err("не удалось открыть консоль для терминального режима".into());
+                    return Err("could not open console for terminal mode".into());
                 }
             }
             // Whatever handles we inherited (none, for a GUI process, or a pipe
