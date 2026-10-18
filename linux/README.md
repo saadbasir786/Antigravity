@@ -1,59 +1,56 @@
-# Antigravity Unlocker — Linux (бета порта)
+# Antigravity Unlocker — Linux (Beta Port)
 
-Разблокировка Antigravity 2.0 / IDE / CLI на Linux. Делает две вещи:
+Unlock Antigravity 2.0 / IDE / CLI on Linux. The tool does two things:
 
-1. **Патч клиентских бинарников и JS** — снимает проверку eligibility.
-2. **Прокси-маршрут (обход ошибки 400 «User location is not supported»)** —
-   поднимает локальный прокси и уводит запросы к серверам Google через выход в
-   разрешённом регионе, так что серверная блокировка по региону снимается.
-   Свой VPN/прокси при этом **не нужен** — используется встроенный выход.
+1. **Patches client binaries and JavaScript** to bypass the eligibility check.
+2. **Proxy routing (to work around the “400 — User location is not supported” error):** starts a local proxy and routes requests to Google servers through an exit in a supported region, addressing the server-side regional restriction. You do **not** need your own VPN or proxy; the tool uses its built-in exit route.
 
-Всё работает **под обычным пользователем, без root** (sudo не спрашивается).
+Everything runs as a **regular user, without root privileges** (sudo is not requested).
 
-## Запуск — максимально просто
+## Quick Start
 
-1. Распакуйте архив куда угодно (на общую папку VM или диск Windows — тоже
-   можно: если оттуда нельзя запускать программы, анлокер сам скопирует себя в
-   домашнюю папку).
-2. Двойной клик по **`launch.sh`** → **«Запустить как программу»**, или в
-   терминале: `bash launch.sh`. **`sudo` не нужен** — под sudo анлокер не
-   запустится и скажет почему. Сначала он спросит ключ (бесплатно в группе
-   t.me/nova_txt), потом покажет переключатели.
-3. Нажмите **«Включить всё»**.
-4. **Закройте Antigravity полностью и откройте снова** — языковой сервер
-   подхватит прокси, и ошибка 400 уйдёт.
+1. Extract the archive anywhere. A shared VM folder or a Windows drive is also fine. If programs cannot be launched from that location, the unlocker will copy itself to your home directory.
+2. Double-click **`launch.sh`** and choose **“Run as a Program”**, or run `bash launch.sh` in a terminal. **Do not use `sudo`**; the unlocker will not run under sudo and will explain why. It will first ask for a key (available for free in the [Telegram group](https://t.me/nova_txt)), then show the available switches.
+3. Click **“Enable All”**.
+4. **Fully close Antigravity and reopen it.** The language server will pick up the proxy, and the 400 error should be resolved.
 
-Хотите запускать из меню приложений — один раз `bash install.sh`.
+To launch it from your applications menu, run `bash install.sh` once.
 
-Без графического сеанса (сервер по SSH) анлокер сам откроется прямо в
-терминале. Или без архива, одной командой:
+Without a graphical desktop (for example, on a server over SSH), the unlocker opens directly in the terminal. You can also launch the terminal UI without downloading the archive manually:
 
-    curl -fsSL https://raw.githubusercontent.com/confeden/Antigravity/main/tui.sh | sh
+```bash
+curl -fsSL https://raw.githubusercontent.com/confeden/Antigravity/main/tui.sh | sh
+```
 
-## Как отключить
+## How to Disable It
 
-Выключите те же переключатели — «Разблокировать вход в аккаунт» вернёт файлы
-как были, «Обход ошибки 400» уберёт локальный прокси и `AG_LS_PROXY`. Вручную:
-удалить `~/.config/environment.d/ag-unlocker.conf` и
-`systemctl --user disable --now ag-unlocker-proxy`.
+Turn off the same switches you enabled. **“Unlock Account Sign-in”** restores the original files, while **“Bypass Error 400”** removes the local proxy and `AG_LS_PROXY`.
 
-## Если установка не нашлась автоматически
+To disable it manually, remove `~/.config/environment.d/ag-unlocker.conf` and run:
 
-Карандаш **✏** в строке нужной установки — указать путь вручную. Типичные
-места: `/opt/antigravity`, `~/.local/share/antigravity`, `~/.local/bin` (CLI).
-Snap-версия не патчится (read-only), используйте не-snap установку.
+```bash
+systemctl --user disable --now ag-unlocker-proxy
+```
 
-## Чего на Linux пока нет
+## If the Installation Is Not Detected Automatically
 
-DNS-слой (правила NRPT и локальный релей на `:53`) — это Windows. На Linux
-работает патч клиента и прокси-маршрут через встроенный выход; переключатели
-DNS-части в окне ничего не поставят.
+Click the **✏ pencil icon** next to the relevant installation and enter its path manually. Common locations include:
 
-## Файлы
+- `/opt/antigravity`
+- `~/.local/share/antigravity`
+- `~/.local/bin` (CLI)
 
-| Файл | Что это |
+The Snap version cannot be patched because it is read-only. Use a non-Snap installation instead.
+
+## Linux Limitations
+
+The DNS layer (NRPT rules and a local relay on port `:53`) is Windows-only. On Linux, the client patch and proxy routing through the built-in exit route are available; DNS-related switches in the interface will not install anything.
+
+## Files
+
+| File | Description |
 |---|---|
-| `ag_unlocker` | патчер + прокси + окно и терминальный режим (ELF x86-64, glibc 2.17+) |
-| `launch.sh` | обёртка: проверяет права на запуск; без графического сеанса — терминальный режим |
-| `Antigravity-Unlocker.desktop` | ярлык |
-| `install.sh` | добавляет ярлык в меню приложений |
+| `ag_unlocker` | Patcher, proxy, graphical interface, and terminal UI (ELF x86-64, glibc 2.17+) |
+| `launch.sh` | Launcher wrapper: checks execution permissions and starts the terminal UI when no graphical session is available |
+| `Antigravity-Unlocker.desktop` | Desktop shortcut |
+| `install.sh` | Adds the shortcut to the applications menu |
